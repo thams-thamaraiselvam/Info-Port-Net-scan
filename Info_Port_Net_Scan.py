@@ -3,8 +3,11 @@ import os
 
 # Network Details
 def get_network_details(ip_address):
-    hostname = socket.gethostbyaddr(ip_address)[0]
-    return hostname
+    try:
+        hostname = socket.gethostbyaddr(ip_address)[0]
+        return hostname
+    except socket.herror:
+        return "Hostname not found"
 
 # OS Details
 def get_os_details():
@@ -19,6 +22,17 @@ def get_hardware_info():
     hdd_info = os.statvfs('/').f_frsize * os.statvfs('/').f_blocks  # Total HDD storage in bytes
     return cpu_info, ram_info, hdd_info
 
+# Port Scanner
+def scan_ports(ip_address):
+    open_ports = []
+    for port in range(1, 1025):  # Scan common ports
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        result = sock.connect_ex((ip_address, port))
+        if result == 0:
+            open_ports.append(port)
+        sock.close()
+    return open_ports
+
 # Main function
 def main():
     ip_address = input("Enter the IP address: ")
@@ -32,6 +46,9 @@ def main():
     print(f"CPU: {cpu_info}")
     print(f"RAM: {ram_info} bytes")
     print(f"HDD: {hdd_info} bytes")
+
+    open_ports = scan_ports(ip_address)
+    print(f"Open ports: {open_ports}")
 
 if __name__ == "__main__":
     main()
